@@ -33,7 +33,7 @@ namespace Xadrez
             p.IncrementarQteMovimentos();
             Peca pecaCapturada = tab.RetirarPeca(destino);
             tab.ColocarPeca(p, destino);
-            if(pecaCapturada != null)
+            if (pecaCapturada != null)
             {
                 capturadas.Add(pecaCapturada);
             }
@@ -46,7 +46,7 @@ namespace Xadrez
             Peca p = tab.RetirarPeca(destino);
             p.DecrementarQteMovimentos();
 
-            if(pecaCapturada != null)
+            if (pecaCapturada != null)
             {
                 tab.ColocarPeca(pecaCapturada, destino);
                 capturadas.Remove(pecaCapturada);
@@ -75,8 +75,15 @@ namespace Xadrez
                 xeque = false;
             }
 
-            turno++;
-            MudaJogador();
+            if (TesteXequeMate(Adversaria(jogadorAtual)))
+            {
+                terminada = true;
+            }
+            else
+            {
+                turno++;
+                MudaJogador();
+            }
         }
 
         public void ValidarPosicaoOrigem(Posicao pos)
@@ -120,9 +127,9 @@ namespace Xadrez
         public HashSet<Peca> PecasCapturadas(Cor cor)
         {
             HashSet<Peca> aux = new HashSet<Peca>();
-            foreach(Peca x in capturadas)
+            foreach (Peca x in capturadas)
             {
-                if(x.cor == cor)
+                if (x.cor == cor)
                 {
                     aux.Add(x);
                 }
@@ -149,7 +156,7 @@ namespace Xadrez
 
         private Cor Adversaria(Cor cor)
         {
-            if(cor == Cor.Branca)
+            if (cor == Cor.Branca)
             {
                 return Cor.Preta;
             }
@@ -163,7 +170,7 @@ namespace Xadrez
         {
             foreach (Peca x in PecasJogo(cor))
             {
-                if(x is Rei)
+                if (x is Rei)
                 {
                     return x;
                 }
@@ -176,12 +183,12 @@ namespace Xadrez
         {
             Peca r = Rei(cor);
 
-            if(r == null)
+            if (r == null)
             {
                 throw new TabuleiroExpection("Não tem Rei da cor " + cor + " no tabuleiro!");
             }
 
-            foreach(Peca x in PecasJogo(Adversaria(cor)))
+            foreach (Peca x in PecasJogo(Adversaria(cor)))
             {
                 bool[,] mat = x.MovimentosPossiveis();
 
@@ -194,6 +201,41 @@ namespace Xadrez
             return false;
         }
 
+        public bool TesteXequeMate(Cor cor)
+        {
+            if (!EstaXeque(cor))
+            {
+                return false;
+            }
+
+            foreach (Peca x in PecasJogo(cor))
+            {
+                bool[,] mat = x.MovimentosPossiveis();
+
+                for (int i = 0; i < tab.linhas; i++)
+                {
+                    for (int j = 0; j < tab.colunas; j++)
+                    {
+                        if (mat[i, j])
+                        {
+                            Posicao origem = x.posicao;
+                            Posicao destino = new Posicao(i, j);
+                            Peca pecaCapturada = ExecutaMovimento(origem, destino);
+                            bool testeXeque = EstaXeque(cor);
+                            DesfazMovimento(origem, destino, pecaCapturada);
+
+                            if (!testeXeque)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public void ColocarNovaPeca(char coluna, int linha, Peca peca)
         {
             tab.ColocarPeca(peca, new PosicaoXadrez(coluna, linha).ToPosicao());
@@ -202,7 +244,7 @@ namespace Xadrez
 
         private void ColocarPecas()
         {
-            ColocarNovaPeca('c', 1, new Torre(tab, Cor.Branca));
+            /*ColocarNovaPeca('c', 1, new Torre(tab, Cor.Branca));
             ColocarNovaPeca('c', 2, new Torre(tab, Cor.Branca));
             ColocarNovaPeca('d', 2, new Torre(tab, Cor.Branca));
             ColocarNovaPeca('e', 2, new Torre(tab, Cor.Branca));
@@ -214,7 +256,13 @@ namespace Xadrez
             ColocarNovaPeca('d', 7, new Torre(tab, Cor.Preta));
             ColocarNovaPeca('e', 7, new Torre(tab, Cor.Preta));
             ColocarNovaPeca('e', 8, new Torre(tab, Cor.Preta));
-            ColocarNovaPeca('d', 8, new Rei(tab, Cor.Preta));
+            ColocarNovaPeca('d', 8, new Rei(tab, Cor.Preta));*/
+            ColocarNovaPeca('c', 1, new Torre(tab, Cor.Branca));
+            ColocarNovaPeca('h', 7, new Torre(tab, Cor.Branca));
+            ColocarNovaPeca('d', 1, new Rei(tab, Cor.Branca));
+
+            ColocarNovaPeca('a', 8, new Rei(tab, Cor.Preta));
+            ColocarNovaPeca('b', 8, new Torre(tab, Cor.Preta));
 
             //tab.ColocarPeca(new Rei(tab, Cor.Preta), new PosicaoXadrez('d', 8).ToPosicao());
 
