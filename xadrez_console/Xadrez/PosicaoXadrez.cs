@@ -22,5 +22,6 @@ namespace Xadrez
         {
             return "" + coluna + linha;
         }
+
     }
 }
